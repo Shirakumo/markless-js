@@ -19,6 +19,16 @@ export function isInstanceOf(name, instance){
     return false;
 }
 
+export function checkInstanceOf(name, instance){
+    if(!isInstanceOf(name, instance))
+        throw new Error(instance+" is not an instance of "+name);
+    return instance;
+}
+
+export function subTypeOf(sub, sup){
+    return primitiveType(sub).supers.contains(sup);
+}
+
 function initSlot(instance, slot, args){
     if(args === undefined) args = {};
     if(args[slot.name] !== undefined){
@@ -30,15 +40,15 @@ function initSlot(instance, slot, args){
     }
 }
 
-export function makePrimitiveType(name, args){
+export function makeInstance(name, args, prototype){
     if(args === undefined) args = {};
+    if(prototype === undefined) prototype = {};
     let type = primitiveType(name);
-    let instance = {};
-    instance.type = name;
+    prototype.type = name;
     for(let slotName in type.slots){
-        initSlot(instance, type.slots[slotName], args);
+        initSlot(prototype, type.slots[slotName], args);
     }
-    return instance;
+    return prototype;
 }
 
 export function changePrimitiveType(instance, name, args){
@@ -130,6 +140,6 @@ export function definePrimitiveType(name, directSupers, slotdefs){
     type.directSlots = directSlots;
     type.supers = computeClassPrecedenceList(type);
     type.slots = computeSlots(type);
-    type.make = (args)=>makePrimitiveType(name, args);
+    type.make = (args)=>makeInstance(name, args);
     return type;
 }
